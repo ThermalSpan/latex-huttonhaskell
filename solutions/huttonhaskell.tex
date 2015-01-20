@@ -1,0 +1,220 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{fullpage}
+
+%Best Haskell settings, courtesy of https://www.haskell.org/haskellwiki/Literate_programming
+\usepackage{listings}
+\lstloadlanguages{Haskell}
+\lstnewenvironment{code}
+    {\lstset{}%
+      \csname lst@SetFirstLabel\endcsname}
+    {\csname lst@SaveFirstLabel\endcsname}
+    \lstset{
+      basicstyle=\small\ttfamily,
+      flexiblecolumns=false,
+      basewidth={0.5em,0.45em},
+      literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
+               {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1
+               {\\\\}{{\char`\\\char`\\}}1
+               {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
+               {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2 
+               {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
+               {>>}{{>>}}2 {>>=}{{>>=}}2
+               {|}{{$\mid$}}1               
+    }
+
+\begin{document}
+\section{Chapter One}
+\begin{enumerate}
+\item Consider the function $double x = x + x$. When evaluating $double ( double 2)$ we quickly run into the question of what order to evaluate the functions in. The two examples Hutton give demonstrate applicative order and normal order respectively. Another possible way to look at it would be to consider an order of operations scenario, where all $double$ functions must be evaluated before $+$ operators. Then we get the following calculation:
+\begin{align*}
+double ( double 2) &= double ( 2 + 2)\\
+&= (2 +2 ) +(2+2)\\
+&=4 + (2 + 2)\\
+&= 4 + 4\\
+&= 8
+\end{align*}
+
+\item Consider the function $sum [x]$. We see that:
+\begin{align*}
+sum[x] &= sum x:[]\\
+&= x + sum[]\\
+&= x + 0\\
+&= x\\
+\end{align*}
+Therefore, $sum [x] = x \ \forall \ x :: Num$.
+
+\item Consider the $product$ function:
+\begin{align*}
+product [] &= 1\\
+product (x:xs) &= x \cdot product xsa
+\end{align*}
+We will use this definition to perform a calculation:
+\begin{align*}
+product [2,3,4] &= 2 \cdot product [3,4]\\
+&= 2 \cdot 3 \cdot product [4]\\
+&= 2 \cdot 3 \cdot 4 \cdot product []\\
+&= 2 \cdot 3 \cdot 4 \cdot 1\\
+&= 2 \cdot 3 \cdot 4 \\
+&= 2 \cdot 12\\
+&= 24
+\end{align*}
+
+\item We can define a quick sort function that sorts from largest to smallest with the following definition:
+\begin{code}
+    qsortrev [] = []
+qsortrev (x:xs) = qsortrev  larger ++ [x] ++ qsortrev  smaller
+                          where 
+                             smaller = [a | a <- xs, a =< x]
+                             larger = [b | b <- xs, b > x] 
+\end{code}
+
+\item Consider the definition of $qsort$ given by Hutton. If the $\leq$ were replaces with a $<$ then during the evaluation of $qsort$ any other values in the list, $a \in xs \ | \  a = x$ will be dropped. We can see the result of this change in the following calculation:
+\begin{align*}
+qsort [2,2,3,1,1] &= qsort [1, 1]++[2]++qsort[3]\\
+&= qsort[1,1]++[2]++[3]\\
+&= [1]++[2]++[3]\\
+&= [1]++[2,3]\\
+&=[1,2,3]
+\end{align*}
+\end{enumerate}
+
+\section{Chapter Two}
+\begin{enumerate}
+\item \begin{itemize}
+\item $2 \uparrow 3 * 4 = (2 \uparrow 3 ) * 4$
+\item $2 * 3 + 4 * 5 = (2*3) + (4 * 5)$
+\item $2 + 3 *4 \uparrow 5 = 2 + ( 3 * (4 \uparrow 5))$
+\end{itemize}
+
+\item This is a good place to mention, Hutton wrote the book with the Hugs system in mind. Hugs is no longer maintained, as such I have been using GHCi. So far, this doesn't seem to be a problem. One thing to note, any multiline input must be between $:\{$ and $:\}$.
+
+
+\item Here are the syntactic errors I found. 
+\begin{itemize}
+\item The $N$ was capitalized. 
+\item The $div$ was not surrounded by back ticks, i.e. $`div`$. 
+\item The $xs$ was not in the same column as the $a$ above it. 
+\end{itemize}
+
+\item The first definition for last I came up with is this:
+\begin{code}
+last xs = xs!!((length xs)-1)
+\end{code}
+However the intention is not very clear. So I came up with this:
+\begin{code}
+last xs = head (reverse xs)
+\end{code}
+Lastly, we could use some pattern matching.
+\begin{code}
+last (x:[]) = x
+last (x:xs) = last xs
+\end{code}
+
+\item Similiar to last, here are two possible definitions for $init$.
+\begin{code}
+init1 xs = take ((length xs)-1) xs
+
+init2 xs = reverse (tail (reverse xs))
+\end{code}
+\end{enumerate}
+
+\section{Chapter Three}
+\begin{enumerate}
+\item 
+\begin{code}
+['a','b','c'] :: [Char]
+
+('a','b','c') :: (Char, Char, Char)
+
+[ (False , 'O'), (True , '1') ]  :: [(Bool, Char)]
+
+([False,True],[’0’,’1’])  :: ([Bool],[Char])
+
+[ tail , init , reverse ] :: [[a]->[a]]
+\end{code}
+
+\item 
+\begin{code}
+second :: [a]->a
+
+swap :: (a,b)->(b,a)
+
+pair :: a->b->(a,b)
+
+double :: Num a => a->a
+
+palindrome :: Eq a => [a]->Bool
+
+twice :: (a->a)->a->a
+\end{code}
+
+\item The above was checked using GHCi and, up to a variable name change, are correct. 
+
+\item To show that that two functions $f: A \to B$ and $g:A \to B$ are equal then we must prove that $f(x)=g(x) \ \forall \ x \in A$. This is not possible to do in general because $A$ may not be a finite set. That is, to prove equality requires brute force unless there is more information available, so it would not be possible or practical unless $A$ is small. So if $A=\{True, False\}$ then we could easily check for equality. 
+\end{enumerate}
+
+\section{Chapter Four}
+\begin{enumerate}
+\item My first attempt at the $halve$ function:
+\begin{code}
+halve1 xs | even (length xs) = (take n xs, drop n xs) where n = (length xs) `div` 2
+\end{code}
+Using a guard to check for even lists seems like the way to go, but I may revisit this question later.
+
+\item 
+\begin{code}
+safetail1 xs = if xs == [] then [] else tail where (_:tail) = xs
+
+safetail2 xs | xs == []  = []
+             | otherwise = tail where (_:tail)=xs
+             
+safetail3 []     = []
+safetail3 (x:xs) = xs
+\end{code}
+
+\item
+\begin{code}
+(||) :: Bool -> Bool -> Bool
+True  || True  = True
+True  || False = True
+False || True  = True
+False || False = False
+
+(||) :: Bool -> Bool -> Bool
+False || False = False
+_     ||    _  = True 
+
+(||) :: Bool -> Bool -> Bool
+False || a    = a
+True  || True = True
+
+(||) :: Bool -> Bool -> Bool
+a    || False = a
+True || True  = True
+\end{code}
+
+\item 
+\begin{code}
+(&&) :: Bool -> Bool -> Bool
+a && b = if a == True then expr else False
+ 	 where
+            expr = if b == True then True else False
+\end{code}
+
+\item It's possible that I misunderstood the previous question, since I only included one definition to avoid any patter matching. If we allow pattern matching against function definitions, but not patterns in the definition that we get:
+\begin{code}
+(&&) :: Bool -> Bool -> Bool
+True && a  = if a == True then True else False
+False && _ = False
+\end{code}
+
+\item 
+\begin{code}
+mult = \x->(\y->(\z->x*y*z)))
+\end{code}
+
+
+\end{enumerate}
+
+\end{document}
