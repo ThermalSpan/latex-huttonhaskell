@@ -213,8 +213,72 @@ False && _ = False
 \begin{code}
 mult = \x->(\y->(\z->x*y*z)))
 \end{code}
-
-
 \end{enumerate}
 
+\section{Chapter 5}
+I took a long break before coming back to this. Sad face. Any who, this is a good place to mention that some of the functions Hutton assumes are available will actually need to be imported in order to work with prelude. I added the following import statement to make use of these functions. 
+\begin{code}
+import Data.Char (ord, chr, isLower)
+\end{code}
+
+\begin{enumerate}
+\item
+\begin{code}
+sum [ x^2 | x <- [1..100]]
+\end{code}
+
+\item
+\begin{code}
+replicate :: Int -> a -> [a]
+replicate n x = [ x | _<-[1..n]]
+\end{code}
+
+\item
+\begin{code}
+pyths :: Int -> [(Int, Int, Int)]
+pyths n = [ (x,y,z) | x<-[1..n], y<-[1..n],
+            let s = x^2 + y^2,
+            let z = truncate (sqrt (fromIntegral s)),
+            z*z == s, z <= n]
+\end{code}
+
+\item Here's one solution, that takes the easy approach.
+\begin{code}
+perfects1 :: Int -> [Int]
+perfects1 n = [i | i <- [1..n], sum (factors i) - i == i]
+\end{code}
+Here's another, perhaps less efficient? approach using a filter and an anonymous function. 
+\begin{code}
+perfects2 :: Int -> [Int]
+perfects2 n = [i | i <- [1..n], sum (filter (\x->x/=i) (factors i)) == i]
+\end{code}
+
+\item I may not have understood the question, but here's my answer.
+\begin{code}
+[ x | x<-zip (concat [replicate 3 i | i <- [1,2,3]]) (concat (replicate 3 [4,5,6]))]
+\end{code}
+
+\item 
+\begin{code}
+positions2 :: Eq a => a -> [a] -> [Int]
+positions2 a as = find a (zip as [1..])
+\end{code}
+
+\item 
+\begin{code}
+scalarproduct :: [Int] -> [Int] -> Int
+scalarproduct xs ys = sum [x*y | (x,y) <- zip xs ys]
+\end{code}
+
+\item I modified the let2int and the shift function. Since I did not have an expanded table with upper case frequencies, I converted all upper case characters to lower case characters before encoding, so that information is lost. I may revisit this so as to preserve case information while still using the original table. 
+\begin{code}
+let2int :: Char->Int
+let2int c | isLower c = ord c - ord 'a'
+          | isUpper c = let2int (toLower c)
+
+shift :: Int->Char->Char
+shift n c | isUpper c || isLower c = int2let ((let2int c + n) `mod` 26)
+          | otherwise = c
+\end{code}
+\end{enumerate}
 \end{document}
