@@ -1,3 +1,5 @@
 solutions/**
 !solutions/huttonhaskell.pdf
 !solutions/huttonhaskell.tex
+*.swp
+*.swo
