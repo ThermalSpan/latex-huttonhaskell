@@ -24,7 +24,7 @@
     }
 
 \begin{document}
-\section{Chapter One}
+\section{Chapter 1}
 \begin{enumerate}
 \item Consider the function $double x = x + x$. When evaluating $double ( double 2)$ we quickly run into the question of what order to evaluate the functions in. The two examples Hutton give demonstrate applicative order and normal order respectively. Another possible way to look at it would be to consider an order of operations scenario, where all $double$ functions must be evaluated before $+$ operators. Then we get the following calculation:
 \begin{align*}
@@ -79,7 +79,7 @@ qsort [2,2,3,1,1] &= qsort [1, 1]++[2]++qsort[3]\\
 \end{align*}
 \end{enumerate}
 
-\section{Chapter Two}
+\section{Chapter 2}
 \begin{enumerate}
 \item \begin{itemize}
 \item $2 \uparrow 3 * 4 = (2 \uparrow 3 ) * 4$
@@ -119,7 +119,7 @@ init2 xs = reverse (tail (reverse xs))
 \end{code}
 \end{enumerate}
 
-\section{Chapter Three}
+\section{Chapter 3}
 \begin{enumerate}
 \item 
 \begin{code}
@@ -154,7 +154,7 @@ twice :: (a->a)->a->a
 \item To show that that two functions $f: A \to B$ and $g:A \to B$ are equal then we must prove that $f(x)=g(x) \ \forall \ x \in A$. This is not possible to do in general because $A$ may not be a finite set. That is, to prove equality requires brute force unless there is more information available, so it would not be possible or practical unless $A$ is small. So if $A=\{True, False\}$ then we could easily check for equality. 
 \end{enumerate}
 
-\section{Chapter Four}
+\section{Chapter 4}
 \begin{enumerate}
 \item My first attempt at the $halve$ function:
 \begin{code}
@@ -280,5 +280,128 @@ shift :: Int->Char->Char
 shift n c | isUpper c || isLower c = int2let ((let2int c + n) `mod` 26)
           | otherwise = c
 \end{code}
+\end{enumerate}
+
+\section{Chapter 6}
+\begin{enumerate}
+\item We could describe exponentiation as follows.
+\begin{code}
+(^) :: Int -> Int -> Int
+m^0 = 1
+m^(n+1) = m * (m^n)
+\end{code}
+We will now show how this definition is used in evaluating $2^3$.
+\begin{align*}
+2^3 &= 2 * ( 2^2)\\
+&= 2 * ( 2 * (2^1))\\
+&= 2 * (2 * ( 2 * ( 2^0)))\\
+&= 2 * (2 * ( 2 * ( 1)))\\
+&=2 * (2 * ( 2 ))\\
+&= 2 * (4)\\
+&= 8
+\end{align*}
+
+\item We will evaluate $\text{length }[1,2,3]$
+\begin{align*}
+\text{length } [1,2,3] &= 1 + \text{length } [2,3]\\
+&= 1 + (1 + \text{length } [3])\\
+&= 1  +(1 + (1 + \text{length } []))\\
+&= 1 + (1+(1+0))\\
+&= 1 + (1 + (1))\\
+&= 1 + (2)\\
+&=3
+\end{align*}
+We will evaluate $\text{drop }3 [1,2,3,4,5]$
+\begin{align*}
+\text{drop }3 [1,2,3,4,5] &= \text{drop }3 [1,2,3,4,5]\\
+&= \text{drop }2 [2,3,4,5]\\
+&= \text{drop }1 [3,4,5]\\
+&= \text{drop }0 [4,5]\\
+&= [4,5]
+\end{align*}
+We will evaluate $\text{init } [1,2,3]$
+\begin{align*}
+\text{init } [1,2,3] &= 1:(\text{init } [2,3])\\
+&= 1 : ( 2 : (\text{init } [3] ))\\
+&= 1 : ( 2: ([]))\\
+&= [1,2]
+\end{align*}
+
+\item 
+
+\begin{code}
+and :: [Bool] -> Bool
+and [] = True
+and (False : _ ) = False
+and (True : bs) = and bs
+\end{code}
+
+\begin{code}
+concat :: [[a]] -> [a]
+concat [] = []
+concat (x:xs) = x ++ (concat xs) 
+\end{code}
+
+\begin{code}
+replicate :: Int -> a -> [a]
+replicate 0 _ = []
+replicate n a = a:(replicate (n-1) a)
+\end{code}
+
+\begin{code}
+(!!) :: [a] -> Int -> a
+(x:xs) !! 0 = x
+(x:xs) !! n = xs !! (n-1)
+\end{code}
+
+\begin{code}
+elem :: Eq a => a -> [a] -> Bool
+elem _ [] = False
+elem a (x:xs) = if a==x then True else elem a xs
+\end{code}
+
+\item 
+\begin{code}
+merge :: Ord a => [a] -> [a] -> [a]
+merge xs [] = xs
+merge [] xs = xs
+merge (x:xs) (y:ys) = if x <= y then x:(merge xs (y:ys)) else y:(merge ys (x:xs))
+\end{code}
+
+\item
+\begin{code}
+halve :: [a] -> ([a],[a])
+halve xs = (take h xs, drop h xs)
+            where
+                h = (length xs) `div` 2
+
+mergesort :: Ord a => [a] -> [a]
+mergesort []  = []
+mergesort [a] = [a]
+mergesort xs  = merge (mergesort h1) (mergesort h2) where (h1,h2) = halve xs
+\end{code}
+
+\item 
+\begin{code}
+sum :: Num a => [a] -> a
+sum [] = 0
+sum (x:xs) = x + sum xs
+\end{code}
+
+\begin{code}
+take :: Int -> [a] -> [a]
+take 0 _ = []
+take n (x:xs) = x : (take (n-1) xs)
+\end{code}
+
+\begin{code}
+last :: [a] -> a
+last [a] = a
+last (x:xs) = last xs
+\end{code}
+
+\item[last]
+
+
 \end{enumerate}
 \end{document}
