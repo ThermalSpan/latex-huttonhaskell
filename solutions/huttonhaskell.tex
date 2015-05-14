@@ -399,8 +399,123 @@ last :: [a] -> a
 last [a] = a
 last (x:xs) = last xs
 \end{code}
+\end{enumerate}
 
-\item[last]
+\section{Chapter 7}
+\begin{enumerate}
+\item  We see that prob1 and prob2 are equivalent. 
+\begin{code}
+prob1 :: (a -> b) -> (a -> Bool) -> [a] -> [b]
+prob1 f p xs = [f x | x <- xs, p x]
+
+prob2 :: (a -> b) -> (a -> Bool) -> [a] -> [b]
+prob2 f p xs = map f (filter p xs)
+\end{code}
+
+\item 
+\begin{code}
+all :: (a -> Bool) -> [a] -> Bool
+all p xs = and (map p xs)
+\end{code}
+
+\begin{code}
+any1 :: (a -> Bool) -> [a] -> Bool
+any1 p xs = or (map p xs)
+\end{code}
+
+\begin{code}
+takeWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile _ [] = []
+takeWhile p (x:xs) = if p x then x : takeWhile p xs else []
+\end{code}
+
+\begin{code}
+dropWhile :: (a -> Bool) -> [a] -> [a]
+dropWhile _ [] = []
+dropWhile p (x:xs) = if p x then dropWhile p xs else (x:xs)
+\end{code}
+
+\item
+\begin{code}
+map :: (a -> b) -> [a] -> [b]
+map f = foldr (\x xs -> f x : xs) [] 
+\end{code}
+
+\begin{code}
+filter :: (a -> Bool) -> [a] -> [a]
+filter p = foldr (\x xs -> if p x then x:xs else xs) []
+\end{code}
+
+\item 
+\begin{code}
+dec2int :: [Int] -> Int
+dec2int = foldl (\d x -> x + 10*d) 0
+\end{code}
+
+\item As I understand it, the problem is that there is no such compose function, one that can take a list of functions and return a composition of all of them. The issue with this is in the type system: how would one describe the generalized type of such a function? I suspect this is possible with more advanced machinery, that can support errors, but the type system will not know for sure that any arbitrary list of functions is composable. Instead, we have to use the compose operator one at a time.
+\begin{code}
+sumsqreven = sum.map (^2).filter even
+\end{code} 
+
+\item 
+\begin{code}
+curry :: ((a,b) -> c) -> a -> b -> c
+curry f = \x y -> f (x,y)
+
+uncurry :: (a -> b -> c) -> (a,b) -> c
+uncurry f = \ (x,y) -> f x y
+\end{code}
+
+\item 
+\begin{code}
+chop8 :: [Bit] -> [[Bit]]
+chop8 = unfold (null) (take 8) (drop 8)
+
+map :: (a -> b) -> [a] -> [b]
+map f = unfold (null) (\xs -> f (head xs)) tail
+
+iterate :: (a -> a) -> a -> [a]
+iterate f = unfold (\x->False) id f
+\end{code}
+
+\item Here are the changes made. Notable, a function that prepends a parity bit, and function that checks and removes that bit, and new encode and decode functions that use the parity functions. 
+\begin{code}
+addparity :: [Bit] -> [Bit]
+addparity bs = (sum bs) `mod` 2 : bs
+
+checkparity :: [Bit] -> [Bit]
+checkparity bs = if (sum bs) `mod` 2 == 0 then tail bs else error "Parity check failed..." bs
+
+encodeP :: String -> [Bit]
+encodeP = concat.map (addparity.make8.int2bit.ord)
+
+chop9 :: [Bit] -> [[Bit]]
+chop9 [] = []
+chop9 bs = take 9 bs : chop9 (drop 9 bs)
+
+decodeP :: [Bit] -> String
+decodeP = map (chr.bit2int.checkparity) .chop9
+\end{code}
+
+\item Here's the channel stuff
+\begin{code}
+channel :: [Bit] -> [Bit]
+channel = id
+
+badchannel :: [Bit] -> [Bit]
+badchannel s = tail s
+\end{code}
+Here's some sample output.
+\begin{code}
+Main> (decodeP.channel.encodeP) "abcde"
+"abcde"
+*Main> (decodeP.badchannel.encodeP) "abcde"
+"\176*** Exception: Parity check failed...
+*Main> (decodeP.channel.encodeP) "bad?"
+"bad?"
+*Main> (decodeP.badchannel.encodeP) "bad?"
+"\177\176*** Exception: Parity check failed...
+\end{code}
 
 
 \end{enumerate}
