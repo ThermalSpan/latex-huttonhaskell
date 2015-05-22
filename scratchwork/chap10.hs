@@ -29,21 +29,27 @@ data Prop = Const Bool
           | Var Char
           | Not Prop
           | And Prop Prop
+          | Or Prop Prop
           | Imply Prop Prop
+          | Equiv Prop Prop
 
 eval :: Subst -> Prop -> Bool
 eval _ (Const a)     = a
 eval s (Var c)       = find c s
 eval s (Not p)       = not (eval s p)
 eval s (And p1 p2)   = (eval s p1) && (eval s p2)
+eval s (Or p1 p2)    = (eval s p1) || (eval s p2)
 eval s (Imply p1 p2) = (eval s p1) <= (eval s p2)
+eval s (Equiv p1 p2) = (eval s p1) == (eval s p2)
 
 findVars :: Prop -> [Char]
 findVars (Const _)     = []
 findVars (Var c)       = [c]
 findVars (Not p)       = findVars p
 findVars (And p1 p2)   = findVars p1 ++ findVars p2
+findVars (Or p1 p2)    = findVars p1 ++ findVars p2
 findVars (Imply p1 p2) = findVars p1 ++ findVars p2
+findVars (Equiv p1 p2) = findVars p1 ++ findVars p2
 
 boolGen :: Int -> [[Bool]]
 boolGen 0 = [[]]
@@ -106,6 +112,54 @@ t2 :: Expr
 t2 = Add (Val 2) (Val 2)
 
 
+--Some Homework and the Natural numbers
+data Nat = Zero | Succ Nat
 
+nat2int :: Nat -> Int
+nat2int Zero     = 0
+nat2int (Succ m) = 1 + nat2int m
 
+int2nat :: Int -> Nat
+int2nat 0 = Zero
+int2nat n = Succ (int2nat (n-1))
 
+add :: Nat -> Nat -> Nat
+add Zero n     = n
+add (Succ m) n = Succ (add m n)
+
+mult :: Nat -> Nat -> Nat
+mult Zero n     = Zero
+mult (Succ m) n = add (mult m n) n
+
+--Some homework on Ordering
+occurs' :: Ord a => a -> Tree a -> Bool
+occurs' a (Leaf b) = a == b
+occurs' a (Node b tl tr) = case compare a b of                           
+                           EQ -> True
+                           LT -> occurs' a tl
+                           GT -> occurs' a tr
+
+--Homework on Binary Trees
+data Btree = Bleaf Int | Bnode Btree Btree
+
+leafCount :: Btree -> Int
+leafCount (Bleaf _)     = 1
+leafCount (Bnode t1 t2) = leafCount t1 + leafCount t2
+
+isBalanced :: Btree -> Bool
+isBalanced (Bleaf _)     = True
+isBalanced (Bnode t1 t2) = (leafCount t1 - leafCount t2 <= 1) && isBalanced t1 && isBalanced t2
+
+b1 :: Btree
+b1 = Bnode (Bnode (Bleaf 1) (Bleaf 1)) (Bnode (Bleaf 1) (Bleaf 1))
+
+b2 :: Btree
+b2 = Bnode (Bnode (Bleaf 1) (Bnode (Bleaf 1) (Bleaf 1))) (Bleaf 1)
+
+halve :: [a] -> ([a],[a])
+halve xs = (take n xs, drop n xs) where n = (length xs) `div` 2
+
+balance :: [Int] -> Btree
+balance [a] = Bleaf a
+balance xs  = Bnode (balance a) (balance b) where (a,b) = halve xs
+--Homework on 

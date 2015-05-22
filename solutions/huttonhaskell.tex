@@ -516,7 +516,94 @@ Main> (decodeP.channel.encodeP) "abcde"
 *Main> (decodeP.badchannel.encodeP) "bad?"
 "\177\176*** Exception: Parity check failed...
 \end{code}
+\end{enumerate}
 
+
+
+
+
+\section{Chapter 10}
+\begin{enumerate}
+\item 
+\begin{code}
+mult :: Nat -> Nat -> Nat
+mult Zero n     = Zero
+mult (Succ m) n = add (mult m n) n
+\end{code}
+
+\item Here is our new definition of occurs. It is more efficient because it only does one comparison, instead of at most three. 
+\begin{code}
+occurs' :: Ord a => a -> Tree a -> Bool
+occurs' a (Leaf b) = a == b
+occurs' a (Node b tl tr) = case compare a b of
+                           EQ -> True
+                           LT -> occurs' a tl
+                           GT -> occurs' a tr
+\end{code}
+
+\item
+\begin{code}
+leafCount :: Btree -> Int
+leafCount (Bleaf _)     = 1
+leafCount (Bnode t1 t2) = leafCount t1 + leafCount t2
+
+isBalanced :: Btree -> Bool
+isBalanced (Bleaf _)     = True
+isBalanced (Bnode t1 t2) = (leafCount t1 - leafCount t2 <= 1) && isBalanced t1 && isBalanced t2
+\end{code}
+
+\item
+\begin{code}
+halve :: [a] -> ([a],[a])
+halve xs = (take n xs, drop n xs) where n = (length xs) `div` 2
+
+balance :: [Int] -> Btree
+balance [a] = Bleaf a
+balance xs  = Bnode (balance a) (balance b) where (a,b) = halve xs
+\end{code}
+
+\item 
+\begin{code}
+data Prop = Const Bool
+          | Var Char
+          | Not  n
+          | And Prop Prop
+          | Or Prop Prop
+          | Imply Prop Prop
+          | Equiv Prop Prop
+
+eval :: Subst -> Prop -> Bool
+eval _ (Const a)     = a
+eval s (Var c)       = find c s
+eval s (Not p)       = not (eval s p)
+eval s (And p1 p2)   = (eval s p1) && (eval s p2)
+eval s (Or p1 p2)    = (eval s p1) || (eval s p2)
+eval s (Imply p1 p2) = (eval s p1) <= (eval s p2)
+eval s (Equiv p1 p2) = (eval s p1) == (eval s p2)
+
+findVars :: Prop -> [Char]
+findVars (Const _)     = []
+findVars (Var c)       = [c]
+findVars (Not p)       = findVars p
+findVars (And p1 p2)   = findVars p1 ++ findVars p2
+findVars (Or p1 p2)    = findVars p1 ++ findVars p2
+findVars (Imply p1 p2) = findVars p1 ++ findVars p2
+findVars (Equiv p1 p2) = findVars p1 ++ findVars p2
+\end{code}
 
 \end{enumerate}
+
+\section{Chapter 12}
+\begin{enumerate}
+\item[5] 
+\begin{code}
+pairSum :: Num a => (a, a) -> a
+pairSum (x, y) = x + y
+
+fib :: [Integer]
+fib = 0 : 1 : (map pairSum (zip fib (tail fib)))
+\end{code}
+\end{enumerate}
+
+
 \end{document}

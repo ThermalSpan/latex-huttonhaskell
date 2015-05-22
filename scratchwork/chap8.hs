@@ -20,4 +20,4 @@ parse p s = p s
 (>>=) :: Parser a -> (a -> Parser b) -> Parser b
 p >>= f = \inp -> case parse p inp of
                    []        -> []
-                   [(v,out)] -> parse (f v) out
+[(v,out)] -> parse (f v) out
