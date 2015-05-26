@@ -1,5 +1,5 @@
-solutions/**
-!solutions/huttonhaskell.pdf
-!solutions/huttonhaskell.tex
 *.swp
 *.swo
+*.aux
+*.log
+*.synctex.gz
